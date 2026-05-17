@@ -1,0 +1,177 @@
+import { useState } from "react"; 
+import { Link } from "react-router-dom"; // Import pour la navigation
+import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
+import WisdomDashboard from "@/components/WisdomDashboard";
+import MissionSection from "@/components/MissionSection";
+import PartnersSection from "@/components/PartnersSection";
+import ProgramsSection from "@/components/ProgramsSection";
+import ImpactSection from "@/components/ImpactSection";
+import TeamSection from "@/components/TeamSection";
+import CTASection from "@/components/CTASection";
+import Library from "@/components/Library";
+import Footer from "@/components/Footer";
+import FinanceQuiz from "@/components/FinanceQuiz"; 
+import QuizFloatingButton from "@/components/QuizFloatingButton"; 
+import DonationModal from "@/components/DonationModal";
+import AlliesModal from "@/components/AlliesModal";
+import { Button } from "@/components/ui/button";
+
+const Index = () => {
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [isDonationOpen, setIsDonationOpen] = useState(false);
+  const [isAlliesOpen, setIsAlliesOpen] = useState(false);
+
+  // Fonctions d'ouverture
+  const openQuiz = () => setIsQuizOpen(true);
+  const openDonation = () => setIsDonationOpen(true);
+  const openAllies = () => setIsAlliesOpen(true);
+
+  return (
+    <div className="min-h-screen bg-background relative">
+      <Navbar onOpenQuiz={openQuiz} />
+      
+      <main>
+        <HeroSection />
+        <PartnersSection />
+
+        <WisdomDashboard onOpenQuiz={openQuiz} />
+
+        <MissionSection />
+
+        {/* --- SECTION LECTURE (LIVRE) --- */}
+        <section id="livre" className="py-16 md:py-24 bg-card/30 overflow-hidden">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-16">
+              
+              <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
+                <div 
+                  className="relative cursor-pointer group"
+                  style={{ perspective: '1200px' }}
+                  onClick={() => document.getElementById('modal-preface')?.classList.remove('hidden')}
+                >
+                  <div className="relative w-56 sm:w-72 md:w-80 transition-transform duration-700 ease-out transform-gpu group-hover:rotate-y-[-25deg] shadow-[15px_15px_40px_rgba(0,0,0,0.2)]">
+                    <img 
+                      src="/coverbook.jpg" 
+                      alt="Livre L'Argent Révélé" 
+                      className="rounded-r-lg w-full h-auto border-l-[6px] md:border-l-[10px] border-primary/30"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-r-lg"></div>
+                  </div>
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-secondary text-primary text-[10px] md:text-xs font-black py-2 px-4 rounded-full shadow-lg whitespace-nowrap animate-bounce">
+                    Cliquez pour lire la préface
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full md:w-1/2 space-y-6 md:space-y-8 text-center md:text-left">
+                <div>
+                  <span className="inline-block px-4 py-2 bg-secondary/20 rounded-full text-secondary font-bold text-[10px] md:text-xs mb-4 uppercase tracking-[0.2em]">
+                    Partagez votre expérience
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-black text-primary mb-4 leading-tight">
+                    Déjà lu <span className="text-secondary italic">notre livre ?</span>
+                  </h2>
+                  <p className="text-lg md:text-xl text-primary font-medium border-l-4 border-secondary pl-4 italic mx-auto md:mx-0 max-w-sm md:max-w-none">
+                    "Votre commentaire ou témoignage compte pour nous."
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                    Avez-vous apprécié <strong>L'Argent Révélé</strong> ? Dites-nous comment cet ouvrage a changé votre vision des finances.
+                  </p>
+                  <Button 
+                    onClick={() => {
+                      const WHATSAPP_NUMBER = "25779186635";
+                      const message = encodeURIComponent("Bonjour The Future Foundation, je souhaite laisser un témoignage après avoir lu votre livre 'L'Argent Révélé' :\n\n[Mon témoignage] :");
+                      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
+                    }}
+                    className="bg-[#25D366] hover:bg-[#128C7E] text-white px-6 py-6 h-auto text-base md:text-lg font-bold shadow-xl transition-all active:scale-95 border-none"
+                  >
+                    Témoigner sur WhatsApp
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <ProgramsSection />
+        <ImpactSection />
+        <TeamSection />
+
+        <CTASection 
+          onOpenDonation={openDonation} 
+          onOpenAllies={openAllies} 
+        />
+
+        {/* --- NOUVELLE SECTION BIBLIOTHÈQUE --- */}
+        <Library />
+
+        {/* --- SECTION TRANSITION VERS L'AVATAR (NOUVEAU) --- */}
+        <section className="py-20 bg-gradient-to-b from-transparent to-emerald-500/5 border-t border-emerald-500/10">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-2xl mx-auto space-y-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 text-2xl animate-pulse">
+                ✨
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black text-primary uppercase italic tracking-tighter">
+                Incarne ton <span className="text-emerald-600">évolution</span>
+              </h2>
+              <p className="text-muted-foreground text-lg italic">
+                "Le savoir est une graine, l'action est sa croissance." <br/>
+                Crée ton avatar personnalisé et relève des défis pendant 31 jours.
+              </p>
+              <Link to="/mon-avatar">
+                <Button className="mt-4 px-10 py-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-black uppercase text-xs tracking-widest shadow-[0_20px_40px_rgba(16,185,129,0.2)] transition-all hover:scale-105">
+                  Initialiser mon Avatar
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <Footer />
+
+      {/* --- ÉLÉMENTS INTERACTIFS --- */}
+      <QuizFloatingButton onClick={openQuiz} />
+
+      {/* Modales */}
+      <FinanceQuiz isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
+      <DonationModal isOpen={isDonationOpen} onClose={() => setIsDonationOpen(false)} />
+      <AlliesModal isOpen={isAlliesOpen} onClose={() => setIsAlliesOpen(false)} />
+
+      {/* MODALE PRÉFACE */}
+      <div 
+        id="modal-preface" 
+        className="fixed inset-0 z-[100] hidden bg-primary/40 backdrop-blur-md flex items-center justify-center p-2 sm:p-4"
+        onClick={(e) => { if(e.target === e.currentTarget) e.currentTarget.classList.add('hidden') }}
+      >
+        <div className="bg-[#fdfbf7] w-full max-w-2xl max-h-[90vh] rounded-lg shadow-2xl overflow-hidden flex flex-col border-l-[8px] md:border-l-[15px] border-primary">
+          <div className="p-4 md:p-6 border-b flex justify-between items-center bg-white">
+            <h3 className="font-bold text-primary uppercase text-sm md:text-base">Préface Officielle</h3>
+            <button onClick={() => document.getElementById('modal-preface')?.classList.add('hidden')} className="text-gray-400 hover:text-primary text-xl font-bold p-2">✕</button>
+          </div>
+          <div className="p-6 md:p-12 overflow-y-auto leading-relaxed text-gray-800 space-y-4 text-justify font-serif text-base md:text-lg">
+            <p>Depuis sa forme primitive à celle plus élaborée et moderne, l’argent fait rêver, interroge, inquiète parfois… et pourtant, peu de jeunes osent réellement le sonder.</p> 
+            <p> C’est ce qui rend ce livre si particulier : il est né de la curiosité, de l’audace et de la volonté d’un jeune passionné qui a décidé de comprendre – puis d’expliquer – ce que beaucoup préfèrent ignorer.</p> 
+             <p>Dans ces pages, l’auteur partage sa vision de l’argent avec des mots simples, un regard frais et une énergie authentique. On y sent la spontanéité de quelqu’un qui cherche à apprendre autant qu’à transmettre, et c’est précisément ce qui rend cet ouvrage inspirant.</p>  
+             <p>Bien sûr, certaines explications pourraient gagner à être enrichies par des recherches plus approfondies, par des lectures, des expériences et des conseils d’experts. Mais faut-il déjà tout maîtriser pour commencer à écrire, à partager et à susciter des questions ? Certainement pas.</p> 
+              <p>Ce livre est la preuve qu’on peut avancer, dès lors qu’on a la passion et la volonté d’apprendre. Je souhaite que cette œuvre encourage d’autres jeunes à s’intéresser à l’argent, non comme une fin en soi, mais comme un outil qu’il faut comprendre pour mieux construire sa vie.</p> 
+                <p> Et je souhaite à l’auteur de poursuivre sur cette voie : lire d’avantage, se former, dialoguer, remettre en question, approfondir… car c’est ainsi que naissent les esprits éclairés.</p> 
+                <p> Ce livre est un début prometteur. Avec de la persévérance et beaucoup de curiosité, ce ne sera certainement pas le dernier.</p>
+            <div className="pt-6 mt-6 border-t border-gray-200 text-right">
+              <p className="font-bold text-primary text-lg md:text-xl">M. Edouard Normand BIGENDAKO</p>
+              <p className="text-[10px] md:text-sm font-semibold text-gray-600 uppercase">Gouverneur de la BRB</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Index;
