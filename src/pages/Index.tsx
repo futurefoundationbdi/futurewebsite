@@ -59,7 +59,7 @@ const Index = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-r-lg"></div>
                   </div>
                   <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-secondary text-primary text-[10px] md:text-xs font-black py-2 px-4 rounded-full shadow-lg whitespace-nowrap animate-bounce">
-                    Cliquez pour lire la préface
+                    Débloquez les premiers secrets
                   </div>
                 </div>
               </div>
@@ -67,29 +67,29 @@ const Index = () => {
               <div className="w-full md:w-1/2 space-y-6 md:space-y-8 text-center md:text-left">
                 <div>
                   <span className="inline-block px-4 py-2 bg-secondary/20 rounded-full text-secondary font-bold text-[10px] md:text-xs mb-4 uppercase tracking-[0.2em]">
-                    Partagez votre expérience
+                    Exclusivité • Avant-première
                   </span>
                   <h2 className="text-3xl md:text-5xl font-black text-primary mb-4 leading-tight">
-                    Déjà lu <span className="text-secondary italic">notre livre ?</span>
+                    Le secret est presque <span className="text-secondary italic">révélé...</span>
                   </h2>
                   <p className="text-lg md:text-xl text-primary font-medium border-l-4 border-secondary pl-4 italic mx-auto md:mx-0 max-w-sm md:max-w-none">
-                    "Votre commentaire ou témoignage compte pour nous."
+                    "Soyez parmi les visionnaires qui anticipent le changement financier d'octobre."
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                    Avez-vous apprécié <strong>L'Argent Révélé</strong> ? Dites-nous comment cet ouvrage a changé votre vision des finances.
+                    Ne vous contentez pas d'attendre. Lisez la préface maintenant et rejoignez notre liste VIP pour recevoir des extraits exclusifs avant la sortie officielle.
                   </p>
                   <Button 
                     onClick={() => {
                       const WHATSAPP_NUMBER = "25779186635";
-                      const message = encodeURIComponent("Bonjour The Future Foundation, je souhaite laisser un témoignage après avoir lu votre livre 'L'Argent Révélé' :\n\n[Mon témoignage] :");
+                      const message = encodeURIComponent("Bonjour The Future Foundation, j'ai lu la préface et je souhaite rejoindre la liste VIP pour recevoir les secrets de 'L'Argent Révélé' avant la sortie d'octobre !");
                       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
                     }}
                     className="bg-[#25D366] hover:bg-[#128C7E] text-white px-6 py-6 h-auto text-base md:text-lg font-bold shadow-xl transition-all active:scale-95 border-none"
                   >
-                    Témoigner sur WhatsApp
+                    Rejoindre la liste VIP sur WhatsApp
                   </Button>
                 </div>
               </div>
@@ -108,30 +108,6 @@ const Index = () => {
 
         {/* --- NOUVELLE SECTION BIBLIOTHÈQUE --- */}
         <Library />
-
-     {/* --- SECTION TRANSITION VERS L'AVATAR (MASQUÉE TEMPORAIREMENT) ---
-        <section className="py-20 bg-gradient-to-b from-transparent to-emerald-500/5 border-t border-emerald-500/10">
-          <div className="container mx-auto px-4 text-center">
-            <div className="max-w-2xl mx-auto space-y-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-600 text-2xl animate-pulse">
-                ✨
-              </div>
-              <h2 className="text-3xl md:text-5xl font-black text-primary uppercase italic tracking-tighter">
-                Incarne ton <span className="text-emerald-600">évolution</span>
-              </h2>
-              <p className="text-muted-foreground text-lg italic">
-                "Le savoir est une graine, l'action est sa croissance." <br/>
-                Crée ton avatar personnalisé et relève des défis pendant 31 jours.
-              </p>
-              <Link to="/mon-avatar">
-                <Button className="mt-4 px-10 py-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-black uppercase text-xs tracking-widest shadow-[0_20px_40px_rgba(16,185,129,0.2)] transition-all hover:scale-105">
-                  Initialiser mon Avatar
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-        */}
         
       </main>
 
