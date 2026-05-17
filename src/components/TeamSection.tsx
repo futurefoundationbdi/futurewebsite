@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { 
   User, ShieldCheck, Landmark, Calendar, Megaphone, 
-  Trophy, TrendingUp, FileText, X, ArrowRight, Users 
+  Trophy, TrendingUp, FileText, X, ArrowRight, Users, Layout 
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -33,8 +33,9 @@ const team = [
   },
   {
     name: "IRAKOZE Reine Roxanne",
-    role: "Vice Responsable Opérations",
-    icon: <Calendar className="w-6 h-6 md:w-8 md:h-8" />,
+    role: "Responsable Développement Digital",
+    desc: "Pilotage des solutions numériques et applications mobiles de l'association.",
+    icon: <ShieldCheck className="w-6 h-6 md:w-8 md:h-8" />,
     color: "bg-secondary"
   },
   {
@@ -53,6 +54,12 @@ const team = [
   }
 ];
 
+const oversightCommittee = [
+  { name: "GAHUNGU Bertin", role: "Président du CS" },
+  { name: "BIGIRIMANA Epipode", role: "Vice Président du CS" },
+  { name: "IGIRANEZA Garenne", role: "Secrétaire du CS" },
+];
+
 const otherFounders = [
   { name: "GAHUNGU Bertin", role: "Membre Fondateur" },
   { name: "NDAGARA Kercie Ketina", role: "Membre Fondateur" },
@@ -67,7 +74,7 @@ const TeamSection = () => {
     <section id="equipe" className="py-16 bg-white overflow-hidden">
       <div className="container mx-auto px-4">
         
-        {/* Header - Plus compact sur mobile */}
+        {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-10 md:mb-14">
           <span className="bg-secondary/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">Organigramme</span>
           <h2 className="text-3xl md:text-6xl font-black text-primary mt-4 uppercase tracking-tighter leading-tight">Direction de l' <span className="text-secondary italic">Association</span></h2>
@@ -76,7 +83,7 @@ const TeamSection = () => {
           </p>
         </div>
 
-        {/* LISTE DÉFILANTE AJUSTÉE : min-w-[68vw] pour voir les autres membres */}
+        {/* LISTE DÉFILANTE */}
         <div className="flex overflow-x-auto pb-10 gap-4 snap-x snap-mandatory hide-scrollbar md:grid md:grid-cols-3 lg:grid-cols-4 md:overflow-visible">
           {team.map((member, index) => (
             <div 
@@ -108,41 +115,65 @@ const TeamSection = () => {
           ))}
         </div>
 
-        {/* Bouton Fondateurs */}
+        {/* Bouton Fondateurs & CS */}
         <div className="flex justify-center mt-4">
           <Button 
             onClick={() => setShowFounders(true)}
             variant="outline" 
             className="group border-primary text-primary hover:bg-primary hover:text-white rounded-xl md:rounded-2xl px-6 h-14 md:h-16 text-xs font-black uppercase tracking-widest transition-all shadow-lg w-full md:w-auto"
           >
-            Tous les fondateurs
+            Comité de Surveillance & Fondateurs
             <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-2 transition-transform" />
           </Button>
         </div>
 
-        {/* Modal Fondateurs */}
+        {/* Modal Fondateurs & CS */}
         {showFounders && (
           <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-primary/95 backdrop-blur-sm">
             <div className="bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden relative border-b-[8px] border-secondary">
               <div className="p-5 border-b flex justify-between items-center bg-slate-50">
-                <h3 className="font-black text-primary uppercase text-sm tracking-tighter">Membres Fondateurs</h3>
+                <h3 className="font-black text-primary uppercase text-sm tracking-tighter">Structures de Contrôle & Fondation</h3>
                 <button onClick={() => setShowFounders(false)} className="p-2 bg-white rounded-full text-primary shadow-sm hover:scale-110 transition-transform">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="p-6 md:p-8 max-h-[60vh] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {otherFounders.map((founder, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-500 font-black text-xs">
-                      {founder.name[0]}
-                    </div>
-                    <div>
-                      <h4 className="font-black text-xs text-primary uppercase">{founder.name}</h4>
-                      <p className="text-[9px] text-secondary font-bold uppercase tracking-widest">{founder.role}</p>
-                    </div>
+              <div className="p-6 md:p-8 max-h-[70vh] overflow-y-auto space-y-8">
+                {/* SECTION COMITÉ DE SURVEILLANCE */}
+                <div>
+                  <h4 className="text-secondary font-black text-[10px] uppercase tracking-widest mb-4 border-b pb-2">Comité de Surveillance (Art. 36)</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {oversightCommittee.map((member, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <div className="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-sm">
+                          <ShieldCheck className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-black text-xs text-primary uppercase">{member.name}</h4>
+                          <p className="text-[9px] text-emerald-700 font-bold uppercase tracking-widest">{member.role}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                {/* SECTION MEMBRES FONDATEURS */}
+                <div>
+                  <h4 className="text-slate-400 font-black text-[10px] uppercase tracking-widest mb-4 border-b pb-2">Membres Fondateurs</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {otherFounders.map((founder, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-500 font-black text-xs">
+                          {founder.name[0]}
+                        </div>
+                        <div>
+                          <h4 className="font-black text-xs text-primary uppercase">{founder.name}</h4>
+                          <p className="text-[9px] text-secondary font-bold uppercase tracking-widest">{founder.role}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               
               <div className="p-3 bg-primary text-white text-center text-[9px] font-bold tracking-widest uppercase">
