@@ -109,7 +109,7 @@ const Index = () => {
         {/* --- NOUVELLE SECTION BIBLIOTHÈQUE --- */}
         <Library />
 
-        {/* --- SECTION TRANSITION VERS L'AVATAR (NOUVEAU) --- */}
+     {/* --- SECTION TRANSITION VERS L'AVATAR (MASQUÉE TEMPORAIREMENT) ---
         <section className="py-20 bg-gradient-to-b from-transparent to-emerald-500/5 border-t border-emerald-500/10">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-2xl mx-auto space-y-8">
@@ -131,7 +131,8 @@ const Index = () => {
             </div>
           </div>
         </section>
-
+        */}
+        
       </main>
 
       <Footer />
