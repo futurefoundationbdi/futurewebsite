@@ -52,7 +52,7 @@ const Index = () => {
                 >
                   <div className="relative w-56 sm:w-72 md:w-80 transition-transform duration-700 ease-out transform-gpu group-hover:rotate-y-[-25deg] shadow-[15px_15px_40px_rgba(0,0,0,0.2)]">
                     <img 
-                      src="/coverbook.jpg" 
+                      src="/coverbook.webp" 
                       alt="Livre L'Argent Révélé" 
                       className="rounded-r-lg w-full h-auto border-l-[6px] md:border-l-[10px] border-primary/30"
                     />
