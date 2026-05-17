@@ -7,13 +7,15 @@ const HeroSection = () => {
   const BOOK_TITLE = "L'Argent Révélé: La Clé de la Liberté financière";
 
   const handleWhatsAppOrder = () => {
-    const message = encodeURIComponent(`Bonjour, je souhaite commander le livre "${BOOK_TITLE}".`);
+    // Message modifié pour la pré-commande
+    const message = encodeURIComponent(`Bonjour, je souhaite pré-commander l'ouvrage "${BOOK_TITLE}" et être informé dès sa sortie en octobre.`);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
   };
 
   const handleEmailOrder = () => {
-    const subject = encodeURIComponent(`Commande : ${BOOK_TITLE}`);
-    const body = encodeURIComponent(`Bonjour,\n\nJe souhaiterais commander un exemplaire de votre ouvrage "${BOOK_TITLE}".\n\nMerci de m'indiquer la marche à suivre.`);
+    // Sujet et corps modifiés pour la pré-commande
+    const subject = encodeURIComponent(`Pré-commande : ${BOOK_TITLE} (Sortie Octobre)`);
+    const body = encodeURIComponent(`Bonjour,\n\nJe suis très intéressé par votre futur ouvrage "${BOOK_TITLE}". Je souhaiterais le pré-commander afin de garantir mon exemplaire pour la sortie officielle en octobre.\n\nMerci de me tenir informé des modalités de réservation.`);
     window.location.href = `mailto:${EMAIL_ADDRESS}?subject=${subject}&body=${body}`;
   };
 
@@ -26,14 +28,13 @@ const HeroSection = () => {
 
   return (
     <section id="accueil" className="relative min-h-screen flex items-center pt-24 pb-12 overflow-hidden">
-      {/* Background Image - Optimisée pour Mobile */}
+      {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
           src="/coverweb.png" 
           alt={BOOK_TITLE}
           className="w-full h-full object-cover object-center sm:object-right md:object-center"
         />
-        {/* Overlay progressif : plus sombre sur mobile pour que le texte reste lisible */}
         <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/90 via-emerald-900/80 to-emerald-950/90 md:bg-gradient-to-r md:from-emerald-950/95 md:via-emerald-900/70 md:to-transparent" />
       </div>
 
@@ -43,21 +44,22 @@ const HeroSection = () => {
             🇧🇮 Burundi • Éducation Financière
           </span>
           
-          {/* Titre : Taille réduite sur mobile (3xl) et géante sur PC (7xl) */}
           <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-primary-foreground leading-[1.1] mb-6">
             L'Argent <span className="text-secondary">Révélé</span>
           </h1>
           
           <p className="text-base md:text-xl text-primary-foreground/90 mb-8 leading-relaxed max-w-lg">
-            Découvrez la clé de la liberté financière avec l'ouvrage de référence de 
-            <strong> The Future Generation BDI</strong>. Apprenez à transformer votre vision 
+            Bientôt, découvrez la clé de la liberté financière avec l'ouvrage de référence de 
+            <strong> The Future Generation BDI</strong>. Préparez-vous à transformer votre vision 
             de l'argent pour bâtir un avenir prospère.
           </p>
 
           <div className="flex flex-col gap-6 md:gap-8">
-            {/* Options de commande */}
+            {/* Options de pré-commande */}
             <div className="space-y-4">
-              <p className="text-secondary font-bold text-xs md:text-sm uppercase tracking-widest">Commander via :</p>
+              <p className="text-secondary font-bold text-xs md:text-sm uppercase tracking-widest">
+                Réserver mon exemplaire (Sortie Octobre) :
+              </p>
               <div className="flex flex-wrap gap-3 md:gap-4">
                 <button 
                   onClick={handleWhatsAppOrder}
