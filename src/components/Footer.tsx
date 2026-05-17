@@ -32,12 +32,14 @@ const Footer = () => {
                 <span className="sr-only">Instagram</span>
                 <Instagram className="w-5 h-5" />
               </a>
+              {/*
               <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center opacity-40 cursor-not-allowed">
                 <Facebook className="w-5 h-5" />
-              </div>
-              <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center opacity-40 cursor-not-allowed">
+              </div>*/}
+              
+              {/*<div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center opacity-40 cursor-not-allowed">
                 <Twitter className="w-5 h-5" />
-              </div>
+              </div>*/}
             </div>
           </div>
 
