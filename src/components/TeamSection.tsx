@@ -61,9 +61,7 @@ const oversightCommittee = [
 ];
 
 const otherFounders = [
-  { name: "GAHUNGU Bertin", role: "Membre Fondateur" },
   { name: "NDAGARA Kercie Ketina", role: "Membre Fondateur" },
-  { name: "IGIRANEZA Garenne", role: "Membre Fondateur" },
   { name: "IGIRANEZA Billy Don de Dieu", role: "Membre Fondateur" },
 ];
 
@@ -141,7 +139,7 @@ const TeamSection = () => {
               <div className="p-6 md:p-8 max-h-[70vh] overflow-y-auto space-y-8">
                 {/* SECTION COMITÉ DE SURVEILLANCE */}
                 <div>
-                  <h4 className="text-secondary font-black text-[10px] uppercase tracking-widest mb-4 border-b pb-2">Comité de Surveillance (Art. 36)</h4>
+                  <h4 className="text-secondary font-black text-[10px] uppercase tracking-widest mb-4 border-b pb-2">Comité de Surveillance (</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {oversightCommittee.map((member, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
@@ -159,7 +157,7 @@ const TeamSection = () => {
 
                 {/* SECTION MEMBRES FONDATEURS */}
                 <div>
-                  <h4 className="text-slate-400 font-black text-[10px] uppercase tracking-widest mb-4 border-b pb-2">Membres Fondateurs</h4>
+                  <h4 className="text-slate-400 font-black text-[10px] uppercase tracking-widest mb-4 border-b pb-2">Autres Membres Fondateurs</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {otherFounders.map((founder, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
