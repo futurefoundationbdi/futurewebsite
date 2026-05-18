@@ -26,7 +26,7 @@ const team = [
   },
   {
     name: "ISHIMWE Lysa Fleur",
-    role: "Responsable Opérations & Événementiel",
+    role: "Directrice des Opérations",
     desc: "Planification et exécution des actions terrain.",
     icon: <Calendar className="w-6 h-6 md:w-8 md:h-8" />,
     color: "bg-secondary"
@@ -40,14 +40,14 @@ const team = [
   },
   {
     name: "NIMUBONA Don Fleury",
-    role: "Responsable Communication",
+    role: "Directeur de la Communication & RP",
     desc: "Gestion de l'image et partenariats stratégiques.",
     icon: <Megaphone className="w-6 h-6 md:w-8 md:h-8" />,
     color: "bg-emerald-800"
   },
   {
     name: "ITERITEKA Anniella",
-    role: "Responsable Marketing",
+    role: "Directrice du Marketing & Croissance",
     desc: "Promotion des programmes d'éducation.",
     icon: <TrendingUp className="w-6 h-6 md:w-8 md:h-8" />,
     color: "bg-emerald-900"
