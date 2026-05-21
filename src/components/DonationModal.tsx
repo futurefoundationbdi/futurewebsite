@@ -77,7 +77,7 @@ const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
           </Button>
 
           <p className="text-[9px] text-center text-muted-foreground uppercase tracking-widest pt-4">
-            The Future Foundation BDI
+            The Future Generation BDI
           </p>
         </div>
 
