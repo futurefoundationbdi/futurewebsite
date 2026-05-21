@@ -84,7 +84,7 @@ const Footer = () => {
               </li>
               <li className="flex items-start gap-3 group">
                 <Mail className="w-5 h-5 text-secondary mt-0.5 shrink-0" />
-                <a href="mailto:infos@futuregenerationbdi.org" className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm md:text-base break-all">
+                <a href="mailto:contact@futuregenerationbdi.org" className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm md:text-base break-all">
                   infos@futuregenerationbdi.org
                 </a>
               </li>
@@ -96,7 +96,7 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t border-primary-foreground/10">
           <div className="bg-primary-foreground/5 p-6 rounded-2xl border border-primary-foreground/10 mb-8">
             <p className="text-[11px] md:text-xs text-primary-foreground/60 leading-relaxed text-center italic">
-              Dans le cadre de sa mission d'intérêt général, <span className="text-secondary font-bold">The Future Generation BDI</span> propose des ressources éducatives et des synthèses d'œuvres fondatrices du développement personnel. Nous nous efforçons de respecter les droits de propriété intellectuelle. Si vous êtes ayant-droit d'une œuvre présente sur ce site et que vous souhaitez en restreindre l'accès, merci de nous contacter à <span className="text-secondary font-bold italic">thefuturefoundationbdi@gmail.com</span>.
+              Dans le cadre de sa mission d'intérêt général, <span className="text-secondary font-bold">The Future Generation BDI</span> propose des ressources éducatives et des synthèses d'œuvres fondatrices du développement personnel. Nous nous efforçons de respecter les droits de propriété intellectuelle. Si vous êtes ayant-droit d'une œuvre présente sur ce site et que vous souhaitez en restreindre l'accès, merci de nous contacter à <span className="text-secondary font-bold italic">contact@futuregenerationbdi.org</span>.
             </p>
           </div>
 
