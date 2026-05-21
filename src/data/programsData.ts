@@ -2,10 +2,10 @@ export const VACATION_PROGRAM_DATA = {
   title: "Programme Vacances",
   nextEvent: {
     title: "Été Solidaire",
-    date: "Juillet - Août 2026",
+    date: "--:--: 2026",
     location: "Bujumbura",
-    target: "100 Enfants",
-    status: "Places Limitées",
+    target: "-- Enfants",
+    status: "En préparation",
     description: "Un mois intensif pour offrir des vêtements chauds, du matériel scolaire et un soutien éducatif aux enfants les plus marginalisés."
   },
   gallery: [
@@ -41,10 +41,10 @@ export const FINANCE_PROGRAM_DATA = {
   title: "Éducation Financière",
   nextEvent: {
     title: "Atelier Budget & Épargne",
-    date: "Mars 2026",
+    date: "--:--: 2026",
     location: "Bujumbura",
-    target: "25 Jeunes",
-    status: "Bientôt disponible",
+    target: "-- Jeunes",
+    status: "En préparation",
     description: "Des sessions pratiques pour apprendre aux jeunes à gérer leurs premières économies et préparer leur autonomie financière."
   },
   gallery: [
@@ -63,9 +63,9 @@ export const LIFE_SKILLS_DATA = {
   title: "Compétences de Vie",
   nextEvent: {
     title: "Parcours Leadership",
-    date: "Avril 2026",
+    date: "--:--: 2026",
     location: "Bujumbura",
-    target: "40 Jeunes",
+    target: "-- Jeunes",
     status: "En préparation",
     description: "Un coaching axé sur la discipline, la confiance en soi et les soft skills indispensables pour réussir en société."
   },
