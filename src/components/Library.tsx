@@ -70,26 +70,50 @@ export default function Library() {
   const [userComment, setUserComment] = useState("");
   const [activeView, setActiveView] = useState<'player' | 'reviews'>('player');
   // 3. LA FONCTION DE SOUMISSION (Placez-la ici)
-const handleSubmitReview = (bookId: number) => {
-  if (userRating === 0 || userComment.trim() === "") return;
+const handleSubmitReview = async (bookId: number) => {
+    if (userRating === 0 || userComment.trim() === "") return;
 
-  const newReview = {
-    id: Date.now(),
-    rating: userRating,
-    comment: userComment,
-    date: new Date().toLocaleDateString(),
-    userName: "Membre Future Foundation"
+    try {
+      await addDoc(collection(db, "reviews"), {
+        bookId: bookId,
+        rating: userRating,
+        comment: userComment,
+        createdAt: serverTimestamp(),
+        userName: "Membre Future Foundation"
+      });
+
+      setUserComment("");
+      setUserRating(0);
+    } catch (e) {
+      console.error("Erreur lors de l'ajout du commentaire : ", e);
+    }
   };
+useEffect(() => {
+    // Requête pour récupérer les avis triés par date
+    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const reviewsData: { [key: number]: any[] } = {};
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const bId = data.bookId;
+        
+        if (!reviewsData[bId]) reviewsData[bId] = [];
+        
+        reviewsData[bId].push({
+          id: doc.id,
+          ...data,
+          // Conversion de la date Firebase en texte lisible
+          date: data.createdAt?.toDate().toLocaleDateString('fr-FR') || "À l'instant"
+        });
+      });
+      
+      setReviews(reviewsData);
+    });
 
-  setReviews(prev => ({
-    ...prev,
-    [bookId]: [newReview, ...(prev[bookId] || [])]
-  }));
-
-  setUserComment("");
-  setUserRating(0);
-};
-
+    return () => unsubscribe(); // Nettoyage de la connexion quand on quitte la page
+  }, []);
   useEffect(() => {
     if (viewingFile) {
       localStorage.setItem('future_library_viewing_url', viewingFile);
