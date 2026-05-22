@@ -29,7 +29,9 @@ const ambiances = [
 ];
 
 export default function Library() {
+  // 1. ÉTATS
   const [timeLeft, setTimeLeft] = useState(() => {
+    if (typeof window === 'undefined') return 45 * 60;
     const saved = localStorage.getItem('future_library_time');
     const lastDate = localStorage.getItem('future_library_last_date');
     const now = Date.now();
@@ -41,6 +43,7 @@ export default function Library() {
   });
 
   const [currentBookId, setCurrentBookId] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return null;
     const saved = localStorage.getItem('future_library_book_id');
     return saved ? parseInt(saved) : null;
   });
@@ -53,26 +56,38 @@ export default function Library() {
   const [selectedAmbiance, setSelectedAmbiance] = useState(ambiances[0]);
   const [volume, setVolume] = useState(0.5);
   const [showAdvice, setShowAdvice] = useState(false);
-  
   const [viewingFile, setViewingFile] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('future_library_viewing_url');
   });
 
   const [readMode, setReadMode] = useState<ReadingMode>('normal');
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioTimeInfo, setAudioTimeInfo] = useState({ current: '00:00', total: '00:00' });
-  
-  const ambianceRef = useRef<HTMLAudioElement | null>(null);
-  const bookAudioRef = useRef<HTMLAudioElement | null>(null);
-  const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [reviews, setReviews] = useState<{ [key: number]: any[] }>({});
   const [userRating, setUserRating] = useState(0);
   const [userComment, setUserComment] = useState("");
   const [activeView, setActiveView] = useState<'player' | 'reviews'>('player');
-  // 3. LA FONCTION DE SOUMISSION (Placez-la ici)
-const handleSubmitReview = async (bookId: number) => {
-    if (userRating === 0 || userComment.trim() === "") return;
 
+  const ambianceRef = useRef<HTMLAudioElement | null>(null);
+  const bookAudioRef = useRef<HTMLAudioElement | null>(null);
+  const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 2. FONCTIONS (Déclarées AVANT les useEffect)
+  const togglePlay = () => {
+    if (bookAudioRef.current) {
+      if (isAudioPlaying) bookAudioRef.current.pause();
+      else bookAudioRef.current.play();
+      setIsAudioPlaying(!isAudioPlaying);
+    }
+  };
+
+  const seek = (amount: number) => {
+    if (bookAudioRef.current) bookAudioRef.current.currentTime += amount;
+  };
+
+  const handleSubmitReview = async (bookId: number) => {
+    if (userRating === 0 || userComment.trim() === "") return;
     try {
       await addDoc(collection(db, "reviews"), {
         bookId: bookId,
@@ -81,72 +96,56 @@ const handleSubmitReview = async (bookId: number) => {
         createdAt: serverTimestamp(),
         userName: "Membre Future Foundation"
       });
-
       setUserComment("");
       setUserRating(0);
     } catch (e) {
-      console.error("Erreur lors de l'ajout du commentaire : ", e);
+      console.error("Erreur Firebase : ", e);
     }
   };
-useEffect(() => {
-    // Requête pour récupérer les avis triés par date
+
+  const formatAudioTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  const updateProgress = () => {
+    if (bookAudioRef.current) {
+      const current = bookAudioRef.current.currentTime;
+      const total = bookAudioRef.current.duration || 0;
+      setAudioProgress((current / total) * 100);
+      setAudioTimeInfo({
+        current: formatAudioTime(current),
+        total: formatAudioTime(total)
+      });
+    }
+  };
+
+  // 3. EFFECTs
+  useEffect(() => {
     const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-    
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const reviewsData: { [key: number]: any[] } = {};
-      
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         const bId = data.bookId;
-        
         if (!reviewsData[bId]) reviewsData[bId] = [];
-        
         reviewsData[bId].push({
           id: doc.id,
           ...data,
-          // Conversion de la date Firebase en texte lisible
           date: data.createdAt?.toDate().toLocaleDateString('fr-FR') || "À l'instant"
         });
       });
-      
       setReviews(reviewsData);
     });
-
-    return () => unsubscribe(); // Nettoyage de la connexion quand on quitte la page
+    return () => unsubscribe();
   }, []);
+
   useEffect(() => {
-    if (viewingFile) {
-      localStorage.setItem('future_library_viewing_url', viewingFile);
-    } else {
-      localStorage.removeItem('future_library_viewing_url');
-    }
+    if (viewingFile) localStorage.setItem('future_library_viewing_url', viewingFile);
+    else localStorage.removeItem('future_library_viewing_url');
   }, [viewingFile]);
 
-  useEffect(() => {
-    if (ambianceRef.current) {
-      ambianceRef.current.volume = volume;
-    }
-  }, [volume]);
-
-  useEffect(() => {
-    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.keyCode === 123 || 
-         (e.ctrlKey && e.shiftKey && e.keyCode === 73) || 
-         (e.ctrlKey && e.keyCode === 85) || 
-         (e.ctrlKey && e.keyCode === 80) || 
-         (e.ctrlKey && e.keyCode === 83)) {
-        e.preventDefault();
-      }
-    };
-    window.addEventListener('contextmenu', handleContextMenu);
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('contextmenu', handleContextMenu);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-  
   useEffect(() => {
     if ('mediaSession' in navigator && currentBookId) {
       const activeBook = [...contents.reads, ...contents.audios].find(b => b.id === currentBookId);
@@ -163,12 +162,12 @@ useEffect(() => {
       }
     }
   }, [currentBookId, isAudioPlaying]);
-  
+
   useEffect(() => {
     const isReadingBook = viewingFile && activeTab === 'reads';
     if (isReadingBook && timeLeft > 0) {
       const timer = setInterval(() => {
-        setTimeLeft(prev => {
+        setTimeLeft((prev: number) => {
           const newTime = prev - 1;
           localStorage.setItem('future_library_time', newTime.toString());
           localStorage.setItem('future_library_last_date', Date.now().toString());
@@ -179,41 +178,12 @@ useEffect(() => {
     }
   }, [viewingFile, activeTab, timeLeft]);
 
-  const togglePlay = () => {
-    if (bookAudioRef.current) {
-      if (isAudioPlaying) bookAudioRef.current.pause();
-      else bookAudioRef.current.play();
-      setIsAudioPlaying(!isAudioPlaying);
-    }
-  };
-
-  const seek = (amount: number) => {
-    if (bookAudioRef.current) bookAudioRef.current.currentTime += amount;
-  };
-
-  const updateProgress = () => {
-    if (bookAudioRef.current) {
-      const current = bookAudioRef.current.currentTime;
-      const total = bookAudioRef.current.duration || 0;
-      setAudioProgress((current / total) * 100);
-      setAudioTimeInfo({
-        current: formatAudioTime(current),
-        total: formatAudioTime(total)
-      });
-    }
-  };
-
-  const formatAudioTime = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-  };
-
+  // 4. HANDLERS
   const handleActionStart = (item: any) => {
     if (item.type === 'pdf' && timeLeft <= 0) return;
     if (item.type === 'audio') {
-      setConfirmItem(item); 
-      return; 
+      setConfirmItem(item);
+      return;
     }
     const isAPdfLocked = currentBookId !== null && contents.reads.some(r => r.id === currentBookId);
     if (!isAPdfLocked) {
@@ -232,12 +202,11 @@ useEffect(() => {
 
   const confirmChoice = () => {
     if (confirmItem) {
+      setCurrentBookId(confirmItem.id);
+      localStorage.setItem('future_library_book_id', confirmItem.id.toString());
       if (confirmItem.type === 'pdf') {
-        setCurrentBookId(confirmItem.id);
-        localStorage.setItem('future_library_book_id', confirmItem.id.toString());
         setViewingFile(confirmItem.fileUrl);
       } else {
-        setCurrentBookId(confirmItem.id); 
         setViewingFile(confirmItem.audioSrc);
         setIsAudioPlaying(false);
         setAudioProgress(0);
@@ -260,75 +229,10 @@ useEffect(() => {
         .cd-rotate { animation: spin 6s linear infinite; }
         .cd-pause { animation-play-state: paused; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-
-        .aurora-bg {
-          background: radial-gradient(circle at top right, #051923, #020617);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .aurora-bg::before, .aurora-bg::after {
-          content: "";
-          position: absolute;
-          inset: -100%;
-          z-index: 0;
-          background: 
-            radial-gradient(circle at 30% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
-            radial-gradient(circle at 70% 60%, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
-            radial-gradient(circle at 50% 50%, rgba(5, 150, 105, 0.1) 0%, transparent 50%);
-          filter: blur(80px);
-          animation: aurora-flow 25s infinite alternate ease-in-out;
-        }
-
-        .aurora-bg::after {
-          background: radial-gradient(circle at 80% 10%, rgba(45, 212, 191, 0.15) 0%, transparent 40%);
-          animation-delay: -10s;
-          animation-duration: 35s;
-        }
-
-        @keyframes aurora-flow {
-          0% { transform: rotate(0deg) scale(1) translate(0, 0); }
-          50% { transform: rotate(5deg) scale(1.2) translate(5%, 2%); }
-          100% { transform: rotate(-5deg) scale(1) translate(-2%, 5%); }
-        }
-
-        .shooting-star {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          height: 2px;
-          background: linear-gradient(-45deg, #5f91ff, rgba(0, 0, 255, 0));
-          filter: drop-shadow(0 0 6px #699bff);
-          animation: tail 3000ms ease-in-out infinite, shooting 3000ms ease-in-out infinite;
-          z-index: 1;
-        }
-
-        .shooting-star::before, .shooting-star::after {
-          content: '';
-          position: absolute;
-          top: calc(50% - 1px);
-          right: 0;
-          height: 2px;
-          background: linear-gradient(-45deg, rgba(0, 0, 255, 0), #5f91ff, rgba(0, 0, 255, 0));
-          transform: translateX(50%) rotateZ(45deg);
-          border-radius: 100%;
-          animation: shining 3000ms ease-in-out infinite;
-        }
-
-        .shooting-star::after { transform: translateX(50%) rotateZ(-45deg); }
-
-        @keyframes tail { 0% { width: 0; } 30% { width: 100px; } 100% { width: 0; } }
-        @keyframes shining { 0% { width: 0; } 50% { width: 30px; } 100% { width: 0; } }
-        @keyframes shooting { 
-          0% { transform: translateX(0); } 
-          100% { transform: translateX(1000px); } 
-        }
+        .aurora-bg { background: radial-gradient(circle at top right, #051923, #020617); position: relative; overflow: hidden; }
+        .aurora-bg::before { content: ""; position: absolute; inset: -100%; background: radial-gradient(circle at 30% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 40%); filter: blur(80px); animation: aurora-flow 25s infinite alternate ease-in-out; }
+        @keyframes aurora-flow { 0% { transform: scale(1); } 100% { transform: scale(1.2) translate(5%, 2%); } }
       `}</style>
-
-      <div className="shooting-star" style={{top: '10%', left: '-10%', animationDelay: '0s'}} />
-      <div className="shooting-star" style={{top: '40%', left: '-20%', animationDelay: '4500ms'}} />
-      <div className="shooting-star" style={{top: '20%', left: '10%', animationDelay: '8000ms'}} />
 
       <audio ref={ambianceRef} src={selectedAmbiance.url} loop autoPlay={!!viewingFile} />
       <audio 
@@ -343,137 +247,85 @@ useEffect(() => {
       />
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-8 bg-black/40 p-8 rounded-[2.5rem] border border-white/10 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-8 bg-black/40 p-8 rounded-[2.5rem] border border-white/10 backdrop-blur-2xl">
           <div>
             <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-400 to-blue-500 uppercase italic">Future Library</h1>
-            <div className="flex gap-4 mt-4 bg-white/5 p-1.5 rounded-full w-fit border border-white/5">
-              <button onClick={() => setActiveTab('reads')} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase transition-all duration-300 ${activeTab === 'reads' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-white/40 hover:text-white'}`}>📚 Livres</button>
-              <button onClick={() => setActiveTab('audios')} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase transition-all duration-300 ${activeTab === 'audios' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-white/40 hover:text-white'}`}>🎧 Audio</button>
+            <div className="flex gap-4 mt-4 bg-white/5 p-1.5 rounded-full w-fit">
+              <button onClick={() => setActiveTab('reads')} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase transition-all ${activeTab === 'reads' ? 'bg-emerald-500 text-black' : 'text-white/40'}`}>📚 Livres</button>
+              <button onClick={() => setActiveTab('audios')} className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase transition-all ${activeTab === 'audios' ? 'bg-emerald-500 text-black' : 'text-white/40'}`}>🎧 Audio</button>
             </div>
           </div>
-
-          <div className={`transition-all duration-500 ${activeTab === 'reads' ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
-            <div className="bg-emerald-500/10 border border-emerald-500/30 p-5 rounded-[1.8rem] text-center min-w-[140px]">
+          <div className={activeTab === 'reads' ? 'opacity-100' : 'opacity-0'}>
+            <div className="bg-emerald-500/10 border border-emerald-500/30 p-5 rounded-[1.8rem] text-center">
               <span className="text-4xl font-mono font-black text-white">{Math.floor(timeLeft / 60)}m {timeLeft % 60}s</span>
             </div>
           </div>
         </div>
 
-        <div key={activeTab} className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 overflow-x-auto pb-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 overflow-x-auto pb-12">
           {[...contents.reads, ...contents.audios]
             .filter(item => item.type === (activeTab === 'reads' ? 'pdf' : 'audio'))
             .map(item => {
               const isLocked = activeTab === 'reads' && currentBookId !== null && currentBookId !== item.id && contents.reads.some(r => r.id === currentBookId);
-              
-              {/* LA LOGIQUE DE ROTATION CORRIGÉE ICI */}
               const shouldRotate = activeTab === 'audios' && currentBookId === item.id && isAudioPlaying;
 
               return (
-                <div key={item.id} className={`min-w-[85vw] md:min-w-0 bg-white/[0.03] backdrop-blur-md p-6 rounded-[2.2rem] border transition-all duration-500 ${currentBookId === item.id ? 'border-emerald-500/40 shadow-[0_0_50px_rgba(16,185,129,0.1)]' : 'border-white/10 hover:border-white/20'}`}>
+                <div key={item.id} className={`min-w-[85vw] md:min-w-0 bg-white/[0.03] p-6 rounded-[2.2rem] border transition-all ${currentBookId === item.id ? 'border-emerald-500/40 shadow-lg' : 'border-white/10'}`}>
                   <div className="relative overflow-hidden rounded-[1.8rem] mb-6 aspect-[3/4] flex items-center justify-center bg-black/40">
                     {item.type === 'pdf' ? (
-                      <img src={item.cover} className="w-full h-full object-contain p-2 drop-shadow-2xl" alt="" />
+                      <img src={item.cover} className="w-full h-full object-contain p-2" alt="" />
                     ) : (
-                      <div className={`relative w-4/5 aspect-square rounded-full border-4 border-white/10 shadow-2xl overflow-hidden ${shouldRotate ? 'cd-rotate' : 'cd-rotate cd-pause'}`}>
+                      <div className={`relative w-4/5 aspect-square rounded-full border-4 border-white/10 overflow-hidden ${shouldRotate ? 'cd-rotate' : 'cd-rotate cd-pause'}`}>
                         <img src={item.cover} className="w-full h-full object-cover" alt="" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-12 h-12 bg-[#050b14] rounded-full border-4 border-white/10" />
-                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center"><div className="w-12 h-12 bg-black rounded-full border-4 border-white/10" /></div>
                       </div>
                     )}
-                    {isPressing && currentBookId === item.id && <div className="absolute inset-0 bg-emerald-500/20 backdrop-blur-sm flex items-center justify-center animate-pulse"><div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" /></div>}
                   </div>
                   <h3 className="font-bold text-xl text-white italic line-clamp-1">{item.title}</h3>
-                  <p className="text-emerald-500/60 text-[9px] font-black uppercase tracking-widest mb-4">{(item as any).author || (item as any).source}</p>
+                  <p className="text-emerald-500/60 text-[9px] font-black uppercase mb-4">{(item as any).author || (item as any).source}</p>
 
-{activeTab === 'audios' && currentBookId === item.id && viewingFile && (
-  <div className="bg-white/5 p-4 rounded-2xl mb-4 border border-white/10 animate-in zoom-in-95 duration-300">
-    {/* Onglets interne : Lecteur vs Avis */}
-    <div className="flex gap-4 mb-4 border-b border-white/5 pb-2">
-      <button 
-        onClick={() => setActiveView('player')}
-        className={`text-[9px] font-black uppercase ${activeView === 'player' ? 'text-emerald-400' : 'text-white/20'}`}
-      >
-        ▶ Lecteur
-      </button>
-      <button 
-        onClick={() => setActiveView('reviews')}
-        className={`text-[9px] font-black uppercase ${activeView === 'reviews' ? 'text-emerald-400' : 'text-white/20'}`}
-      >
-        💬 Avis ({reviews[item.id]?.length || 0})
-      </button>
-    </div>
-
-    {activeView === 'player' ? (
-      <>
-        <div className="flex justify-between text-[10px] font-mono text-emerald-400 mb-2">
-          <span>{audioTimeInfo.current}</span>
-          <span>{audioTimeInfo.total}</span>
-        </div>
-        <div className="w-full h-1 bg-white/10 rounded-full mb-4 overflow-hidden">
-          <div className="h-full bg-emerald-500 transition-all" style={{ width: `${audioProgress}%` }} />
-        </div>
-        <div className="flex justify-center items-center gap-6">
-          <button onClick={() => seek(-10)} className="text-white/40 hover:text-white text-xs">-10s</button>
-          <button onClick={togglePlay} className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-black hover:scale-110 transition-transform">
-            {isAudioPlaying ? 'II' : '▶'}
-          </button>
-          <button onClick={() => seek(10)} className="text-white/40 hover:text-white text-xs">+10s</button>
-        </div>
-      </>
-    ) : (
-      <div className="space-y-4 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
-        {/* Formulaire de notation */}
-        <div className="bg-black/20 p-3 rounded-xl border border-white/5">
-          <div className="flex gap-1 mb-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button 
-                key={star} 
-                onClick={() => setUserRating(star)}
-                className={`text-sm ${userRating >= star ? 'text-yellow-400' : 'text-white/10'}`}
-              >
-                ★
-              </button>
-            ))}
-          </div>
-          <textarea 
-            value={userComment}
-            onChange={(e) => setUserComment(e.target.value)}
-            placeholder="Votre avis nous aide à grandir..."
-            className="w-full bg-transparent text-[10px] text-white outline-none border-b border-white/10 mb-2"
-          />
-          <button 
-            onClick={() => handleSubmitReview(item.id)}
-            className="text-[8px] font-black uppercase bg-emerald-500 text-black px-3 py-1 rounded-lg"
-          >
-            Publier
-          </button>
-        </div>
-
-        {/* Liste des avis */}
-        <div className="space-y-3">
-          {reviews[item.id]?.map((rev: any) => (
-            <div key={rev.id} className="border-l-2 border-emerald-500/30 pl-3 py-1">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-yellow-400 text-[10px]">{'★'.repeat(rev.rating)}</span>
-                <span className="text-[8px] text-white/20">{rev.date}</span>
-              </div>
-              <p className="text-[10px] text-slate-300 italic">"{rev.comment}"</p>
-            </div>
-          ))}
-          {!reviews[item.id] && <p className="text-[9px] text-white/20 text-center italic">Aucun avis pour le moment.</p>}
-        </div>
-      </div>
-    )}
-  </div>
-)}
+                  {activeTab === 'audios' && currentBookId === item.id && viewingFile && (
+                    <div className="bg-white/5 p-4 rounded-2xl mb-4 border border-white/10">
+                      <div className="flex gap-4 mb-4 border-b border-white/5 pb-2">
+                        <button onClick={() => setActiveView('player')} className={`text-[9px] font-black uppercase ${activeView === 'player' ? 'text-emerald-400' : 'text-white/20'}`}>▶ Lecteur</button>
+                        <button onClick={() => setActiveView('reviews')} className={`text-[9px] font-black uppercase ${activeView === 'reviews' ? 'text-emerald-400' : 'text-white/20'}`}>💬 Avis ({reviews[item.id]?.length || 0})</button>
+                      </div>
+                      {activeView === 'player' ? (
+                        <>
+                          <div className="flex justify-between text-[10px] font-mono text-emerald-400 mb-2"><span>{audioTimeInfo.current}</span><span>{audioTimeInfo.total}</span></div>
+                          <div className="w-full h-1 bg-white/10 rounded-full mb-4 overflow-hidden"><div className="h-full bg-emerald-500" style={{ width: `${audioProgress}%` }} /></div>
+                          <div className="flex justify-center items-center gap-6">
+                            <button onClick={() => seek(-10)} className="text-white/40 text-xs">-10s</button>
+                            <button onClick={togglePlay} className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-black">
+                              {isAudioPlaying ? 'II' : '▶'}
+                            </button>
+                            <button onClick={() => seek(10)} className="text-white/40 text-xs">+10s</button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="space-y-4 max-h-[200px] overflow-y-auto pr-2">
+                          <div className="bg-black/20 p-3 rounded-xl border border-white/5">
+                            <div className="flex gap-1 mb-2">
+                              {[1,2,3,4,5].map(s => <button key={s} onClick={() => setUserRating(s)} className={`text-sm ${userRating >= s ? 'text-yellow-400' : 'text-white/10'}`}>★</button>)}
+                            </div>
+                            <textarea value={userComment} onChange={(e) => setUserComment(e.target.value)} placeholder="Votre avis..." className="w-full bg-transparent text-[10px] text-white outline-none mb-2" />
+                            <button onClick={() => handleSubmitReview(item.id)} className="text-[8px] font-black uppercase bg-emerald-500 text-black px-3 py-1 rounded-lg">Publier</button>
+                          </div>
+                          {reviews[item.id]?.map((rev: any) => (
+                            <div key={rev.id} className="border-l-2 border-emerald-500/30 pl-3 py-1">
+                              <span className="text-yellow-400 text-[10px]">{'★'.repeat(rev.rating)}</span>
+                              <p className="text-[10px] text-slate-300 italic">"{rev.comment}"</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <button 
                     onMouseDown={() => handleActionStart(item)}
                     onMouseUp={() => { setIsPressing(false); if(pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
-                    onTouchStart={() => handleActionStart(item)}
-                    onTouchEnd={() => { setIsPressing(false); if(pressTimerRef.current) clearTimeout(pressTimerRef.current); }}
-                    className={`w-full py-4 rounded-2xl font-black uppercase text-[9px] transition-all duration-300 ${isLocked ? 'bg-white/5 text-white/20' : 'bg-emerald-500 text-black hover:shadow-[0_0_25px_rgba(16,185,129,0.3)]'}`}
+                    className={`w-full py-4 rounded-2xl font-black uppercase text-[9px] ${isLocked ? 'bg-white/5 text-white/20' : 'bg-emerald-500 text-black'}`}
                   >
                     {item.type === 'audio' ? (currentBookId === item.id && viewingFile ? 'En lecture' : 'Écouter') : (isLocked ? 'Verrouillé' : (currentBookId === item.id ? 'Maintenir pour ouvrir' : 'Choisir'))}
                   </button>
@@ -484,71 +336,37 @@ useEffect(() => {
       </div>
 
       {confirmItem && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 backdrop-blur-xl bg-black/80 animate-in fade-in duration-300">
-          <div className="bg-[#0a121e] border border-emerald-500/30 p-8 rounded-[2.5rem] max-w-sm w-full text-center shadow-[0_0_100px_rgba(16,185,129,0.15)]">
-            <h3 className="text-xl font-black text-white mb-2 uppercase italic">{confirmItem.type === 'audio' ? 'Écouter cet audio ?' : 'Confirmer ce livre ?'}</h3>
-            <p className="text-slate-400 text-[11px] mb-8 italic">{confirmItem.type === 'audio' ? 'L\'audio va démarrer maintenant.' : 'Ce choix sera verrouillé pour votre session.'}</p>
-            <button onClick={confirmChoice} className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-[10px] rounded-xl mb-3 hover:scale-[1.02] transition-transform shadow-lg shadow-emerald-500/20">Confirmer</button>
-            <button onClick={() => setConfirmItem(null)} className="w-full py-4 text-white/40 text-[10px] font-bold hover:text-white transition-colors">Annuler</button>
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 backdrop-blur-xl bg-black/80">
+          <div className="bg-[#0a121e] border border-emerald-500/30 p-8 rounded-[2.5rem] max-w-sm w-full text-center">
+            <h3 className="text-xl font-black text-white mb-2 uppercase italic">Confirmer ?</h3>
+            <button onClick={confirmChoice} className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-[10px] rounded-xl mb-3">Confirmer</button>
+            <button onClick={() => setConfirmItem(null)} className="w-full py-4 text-white/40 text-[10px] font-bold">Annuler</button>
           </div>
         </div>
       )}
 
       {viewingFile && activeTab === 'reads' && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 md:p-8 animate-in zoom-in-95 duration-500 bg-black/90">
-          <div className="relative w-full max-w-6xl h-full bg-black border border-white/10 rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 md:p-8 bg-black/90">
+          <div className="relative w-full max-w-6xl h-full bg-black border border-white/10 rounded-[2.5rem] overflow-hidden flex flex-col">
             <div className="p-4 border-b border-white/5 flex flex-wrap justify-between items-center bg-white/5 gap-4">
-              <div className="flex gap-2 bg-black/40 p-1 rounded-full border border-white/10">
+              <div className="flex gap-2">
                 {['normal', 'sepia', 'night'].map(mode => (
-                  <button key={mode} onClick={() => setReadMode(mode as any)} className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase transition-all ${readMode === mode ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>{mode}</button>
+                  <button key={mode} onClick={() => setReadMode(mode as any)} className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase ${readMode === mode ? 'bg-white text-black' : 'text-white/40'}`}>{mode}</button>
                 ))}
               </div>
-              
-              <div className="flex items-center gap-4 bg-emerald-500/10 p-1 pr-4 rounded-full border border-emerald-500/20">
-                <div className="flex gap-1">
-                  {ambiances.map(amb => (
-                    <button 
-                      key={amb.id} 
-                      onClick={() => setSelectedAmbiance(amb)}
-                      className={`px-3 py-1.5 rounded-full text-[8px] font-black uppercase transition-all ${selectedAmbiance.id === amb.id ? 'bg-emerald-500 text-black' : 'text-emerald-500/50 hover:text-emerald-400'}`}
-                    >
-                      {amb.name}
-                    </button>
-                  ))}
-                </div>
-                
-                <div className="flex items-center gap-2 border-l border-emerald-500/20 pl-4">
-                  <span className="text-[10px]">🔊</span>
-                  <input 
-                    type="range" 
-                    min="0" max="1" step="0.01" 
-                    value={volume} 
-                    onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    className="w-16 md:w-24 accent-emerald-500 h-1 bg-white/10 rounded-full appearance-none cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              <button onClick={() => setViewingFile(null)} className="bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all">Fermer</button>
+              <button onClick={() => setViewingFile(null)} className="bg-red-500/20 text-red-500 px-6 py-2 rounded-full text-[9px] font-black uppercase">Fermer</button>
             </div>
-
-            <div className="w-full h-full relative bg-white overflow-auto touch-auto">
+            <div className="w-full h-full relative bg-white">
               <iframe 
-  src={typeof window !== 'undefined' 
-    ? `https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + viewingFile)}&embedded=true`
-    : ''
-  } 
-  className="w-full h-full border-none min-h-[500px]" 
-  style={{ filter: getFilterStyle() }} 
-/>
-              <div className="absolute top-0 right-0 w-24 h-24 bg-transparent z-[210]" />
-              <div className="absolute inset-0 bg-transparent z-[205] pointer-events-none" />
+                src={typeof window !== 'undefined' ? `https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + viewingFile)}&embedded=true` : ''} 
+                className="w-full h-full border-none" 
+                style={{ filter: getFilterStyle() }} 
+              />
             </div>
           </div>
         </div>
       )}
-
-      {showAdvice && <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-emerald-500 text-black px-8 py-4 rounded-full font-black text-[10px] uppercase shadow-2xl animate-bounce">💡 Un livre à la fois pour un esprit discipliné.</div>}
+      {showAdvice && <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-emerald-500 text-black px-8 py-4 rounded-full font-black text-[10px] uppercase">💡 Un livre à la fois.</div>}
     </div>
   );
 }
