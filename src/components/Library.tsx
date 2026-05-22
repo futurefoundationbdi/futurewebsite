@@ -360,9 +360,6 @@ const handleSubmitReview = (bookId: number) => {
                   <h3 className="font-bold text-xl text-white italic line-clamp-1">{item.title}</h3>
                   <p className="text-emerald-500/60 text-[9px] font-black uppercase tracking-widest mb-4">{(item as any).author || (item as any).source}</p>
 
-                  // MODIFICATION À APPORTER DANS LE MAP DES AUDIOS (à l'intérieur du return) :
-// Remplacez la section du lecteur audio par celle-ci :
-
 {activeTab === 'audios' && currentBookId === item.id && viewingFile && (
   <div className="bg-white/5 p-4 rounded-2xl mb-4 border border-white/10 animate-in zoom-in-95 duration-300">
     {/* Onglets interne : Lecteur vs Avis */}
