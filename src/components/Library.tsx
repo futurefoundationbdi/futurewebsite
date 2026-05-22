@@ -534,10 +534,13 @@ useEffect(() => {
 
             <div className="w-full h-full relative bg-white overflow-auto touch-auto">
               <iframe 
-                src={`https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + viewingFile)}&embedded=true`} 
-                className="w-full h-full border-none min-h-[500px]" 
-                style={{ filter: getFilterStyle() }} 
-              />
+  src={typeof window !== 'undefined' 
+    ? `https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + viewingFile)}&embedded=true`
+    : ''
+  } 
+  className="w-full h-full border-none min-h-[500px]" 
+  style={{ filter: getFilterStyle() }} 
+/>
               <div className="absolute top-0 right-0 w-24 h-24 bg-transparent z-[210]" />
               <div className="absolute inset-0 bg-transparent z-[205] pointer-events-none" />
             </div>
