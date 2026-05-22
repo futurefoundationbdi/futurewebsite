@@ -63,6 +63,30 @@ export default function Library() {
   const ambianceRef = useRef<HTMLAudioElement | null>(null);
   const bookAudioRef = useRef<HTMLAudioElement | null>(null);
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [reviews, setReviews] = useState<{ [key: number]: any[] }>({});
+  const [userRating, setUserRating] = useState(0);
+  const [userComment, setUserComment] = useState("");
+  const [activeView, setActiveView] = useState<'player' | 'reviews'>('player');
+  // 3. LA FONCTION DE SOUMISSION (Placez-la ici)
+const handleSubmitReview = (bookId: number) => {
+  if (userRating === 0 || userComment.trim() === "") return;
+
+  const newReview = {
+    id: Date.now(),
+    rating: userRating,
+    comment: userComment,
+    date: new Date().toLocaleDateString(),
+    userName: "Membre Future Foundation"
+  };
+
+  setReviews(prev => ({
+    ...prev,
+    [bookId]: [newReview, ...(prev[bookId] || [])]
+  }));
+
+  setUserComment("");
+  setUserRating(0);
+};
 
   useEffect(() => {
     if (viewingFile) {
@@ -336,25 +360,90 @@ export default function Library() {
                   <h3 className="font-bold text-xl text-white italic line-clamp-1">{item.title}</h3>
                   <p className="text-emerald-500/60 text-[9px] font-black uppercase tracking-widest mb-4">{(item as any).author || (item as any).source}</p>
 
-                  {activeTab === 'audios' && currentBookId === item.id && viewingFile && (
-                    <div className="bg-white/5 p-4 rounded-2xl mb-4 border border-white/10 animate-in zoom-in-95 duration-300">
-                      <div className="flex justify-between text-[10px] font-mono text-emerald-400 mb-2">
-                        <span>{audioTimeInfo.current}</span>
-                        <span>{audioTimeInfo.total}</span>
-                      </div>
-                      <div className="w-full h-1 bg-white/10 rounded-full mb-4 overflow-hidden">
-                        <div className="h-full bg-emerald-500 transition-all" style={{ width: `${audioProgress}%` }} />
-                      </div>
-                      <div className="flex justify-center items-center gap-6">
-                        <button onClick={() => seek(-10)} className="text-white/40 hover:text-white text-xs transition-colors">-10s</button>
-                        <button onClick={togglePlay} className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-black hover:scale-110 transition-transform">
-                          {isAudioPlaying ? 'II' : '▶'}
-                        </button>
-                        <button onClick={() => seek(10)} className="text-white/40 hover:text-white text-xs transition-colors">+10s</button>
-                        <button onClick={() => setIsLooping(!isLooping)} className={`text-xs transition-colors ${isLooping ? 'text-emerald-400' : 'text-white/20'}`}>🔁</button>
-                      </div>
-                    </div>
-                  )}
+                  // MODIFICATION À APPORTER DANS LE MAP DES AUDIOS (à l'intérieur du return) :
+// Remplacez la section du lecteur audio par celle-ci :
+
+{activeTab === 'audios' && currentBookId === item.id && viewingFile && (
+  <div className="bg-white/5 p-4 rounded-2xl mb-4 border border-white/10 animate-in zoom-in-95 duration-300">
+    {/* Onglets interne : Lecteur vs Avis */}
+    <div className="flex gap-4 mb-4 border-b border-white/5 pb-2">
+      <button 
+        onClick={() => setActiveView('player')}
+        className={`text-[9px] font-black uppercase ${activeView === 'player' ? 'text-emerald-400' : 'text-white/20'}`}
+      >
+        ▶ Lecteur
+      </button>
+      <button 
+        onClick={() => setActiveView('reviews')}
+        className={`text-[9px] font-black uppercase ${activeView === 'reviews' ? 'text-emerald-400' : 'text-white/20'}`}
+      >
+        💬 Avis ({reviews[item.id]?.length || 0})
+      </button>
+    </div>
+
+    {activeView === 'player' ? (
+      <>
+        <div className="flex justify-between text-[10px] font-mono text-emerald-400 mb-2">
+          <span>{audioTimeInfo.current}</span>
+          <span>{audioTimeInfo.total}</span>
+        </div>
+        <div className="w-full h-1 bg-white/10 rounded-full mb-4 overflow-hidden">
+          <div className="h-full bg-emerald-500 transition-all" style={{ width: `${audioProgress}%` }} />
+        </div>
+        <div className="flex justify-center items-center gap-6">
+          <button onClick={() => seek(-10)} className="text-white/40 hover:text-white text-xs">-10s</button>
+          <button onClick={togglePlay} className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-black hover:scale-110 transition-transform">
+            {isAudioPlaying ? 'II' : '▶'}
+          </button>
+          <button onClick={() => seek(10)} className="text-white/40 hover:text-white text-xs">+10s</button>
+        </div>
+      </>
+    ) : (
+      <div className="space-y-4 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
+        {/* Formulaire de notation */}
+        <div className="bg-black/20 p-3 rounded-xl border border-white/5">
+          <div className="flex gap-1 mb-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button 
+                key={star} 
+                onClick={() => setUserRating(star)}
+                className={`text-sm ${userRating >= star ? 'text-yellow-400' : 'text-white/10'}`}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+          <textarea 
+            value={userComment}
+            onChange={(e) => setUserComment(e.target.value)}
+            placeholder="Votre avis nous aide à grandir..."
+            className="w-full bg-transparent text-[10px] text-white outline-none border-b border-white/10 mb-2"
+          />
+          <button 
+            onClick={() => handleSubmitReview(item.id)}
+            className="text-[8px] font-black uppercase bg-emerald-500 text-black px-3 py-1 rounded-lg"
+          >
+            Publier
+          </button>
+        </div>
+
+        {/* Liste des avis */}
+        <div className="space-y-3">
+          {reviews[item.id]?.map((rev: any) => (
+            <div key={rev.id} className="border-l-2 border-emerald-500/30 pl-3 py-1">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-yellow-400 text-[10px]">{'★'.repeat(rev.rating)}</span>
+                <span className="text-[8px] text-white/20">{rev.date}</span>
+              </div>
+              <p className="text-[10px] text-slate-300 italic">"{rev.comment}"</p>
+            </div>
+          ))}
+          {!reviews[item.id] && <p className="text-[9px] text-white/20 text-center italic">Aucun avis pour le moment.</p>}
+        </div>
+      </div>
+    )}
+  </div>
+)}
 
                   <button 
                     onMouseDown={() => handleActionStart(item)}
