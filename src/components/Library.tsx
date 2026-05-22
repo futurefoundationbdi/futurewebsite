@@ -1,6 +1,6 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { db } from "../firebaseConfig";
 import { collection, addDoc, query, onSnapshot, orderBy, serverTimestamp } from "firebase/firestore";
-import React, { useState, useEffect, useRef } from 'react';
 
 type ReadingMode = 'normal' | 'sepia' | 'night';
 
